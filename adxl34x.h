@@ -151,6 +151,7 @@ uint8_t adxl_FIFO_Triger_event(const adxl34x_t *adxl);
 uint8_t adxl_FIFO_Entries(const adxl34x_t *adxl);
 void adxl_invert_Int(const adxl34x_t *adxl, bool activeLow);
 adxl_err_t adxl_calibrate(const adxl34x_t *adxl, uint8_t n_samples);
+adxl_err_t adxl_reset(const adxl34x_t *adxl);
 
 
 

@@ -37,61 +37,34 @@ uint8_t adxl_getDeviceID(const adxl34x_t *adxl){
 
     // BW_RATE
 void adxl_LowPowerMode(const adxl34x_t *adxl, bool low_power){
-    uint8_t value;
-    adxl->read(adxl->handle, SPI_READ_SING_BYTE(ADXL34x_REG_BW_RATE), &value, 1);
-    value = BITMASK_SET(value, 0x10, low_power << 4);
-    adxl->write(adxl->handle, SPI_WRITE_SING_BYTE(ADXL34x_REG_BW_RATE), &value, 1);
+    adxl_BitMask_Edit_Sing_Reg(adxl, ADXL34x_REG_BW_RATE, 0x10, low_power << 4);
 }
 void adxl_SamplingRate(const adxl34x_t *adxl, adxl_rate_freq_t s_freq){
-    uint8_t value;
-    adxl->read(adxl->handle, SPI_READ_SING_BYTE(ADXL34x_REG_BW_RATE), &value, 1);
-    value = BITMASK_SET(value, 0x0F, s_freq);
-    adxl->write(adxl->handle, SPI_WRITE_SING_BYTE(ADXL34x_REG_BW_RATE), &value, 1);
+    adxl_BitMask_Edit_Sing_Reg(adxl, ADXL34x_REG_BW_RATE, 0x0F, s_freq);
 }
     //POWER_CTL
 void adxl_link_Act_Inact_func(const adxl34x_t *adxl, bool ena_link){
-    uint8_t value;
-    adxl->read(adxl->handle, SPI_READ_SING_BYTE(ADXL34x_REG_POWER_CTL), &value, 1);
-    value = BITMASK_SET(value, 0x20, ena_link << 5);
-    adxl->write(adxl->handle, SPI_WRITE_SING_BYTE(ADXL34x_REG_POWER_CTL), &value, 1);
+    adxl_BitMask_Edit_Sing_Reg(adxl, ADXL34x_REG_POWER_CTL, 0x20, ena_link << 5);
 }
 void adxl_ena_AutoSleep(const adxl34x_t *adxl, bool ena_AutoSleep){
-    uint8_t value;
-    adxl->read(adxl->handle, SPI_READ_SING_BYTE(ADXL34x_REG_POWER_CTL), &value, 1);
-    value = BITMASK_SET(value, 0x10, ena_AutoSleep << 4);
-    adxl->write(adxl->handle, SPI_WRITE_SING_BYTE(ADXL34x_REG_POWER_CTL), &value, 1);
+    adxl_BitMask_Edit_Sing_Reg(adxl, ADXL34x_REG_POWER_CTL, 0x10, ena_AutoSleep << 4);
 }
 void adxl_ena_Measurement(const adxl34x_t *adxl, bool ena_Measure){
-    uint8_t value;
-    adxl->read(adxl->handle, SPI_READ_SING_BYTE(ADXL34x_REG_POWER_CTL), &value, 1);
-    value = BITMASK_SET(value, 0x08, ena_Measure << 3);
-    adxl->write(adxl->handle, SPI_WRITE_SING_BYTE(ADXL34x_REG_POWER_CTL), &value, 1);
+    adxl_BitMask_Edit_Sing_Reg(adxl, ADXL34x_REG_POWER_CTL, 0x08, ena_Measure << 3);
 }
 void adxl_Sleep(const adxl34x_t *adxl, bool ena_Sleep){
-    uint8_t value;
-    adxl->read(adxl->handle, SPI_READ_SING_BYTE(ADXL34x_REG_POWER_CTL), &value, 1);
-    value = BITMASK_SET(value, 0x04, ena_Sleep << 2);
-    adxl->write(adxl->handle, SPI_WRITE_SING_BYTE(ADXL34x_REG_POWER_CTL), &value, 1);
+    adxl_BitMask_Edit_Sing_Reg(adxl, ADXL34x_REG_POWER_CTL, 0x04, ena_Sleep << 2);
 }
 void adxl_SleepSampleFreq(const adxl34x_t *adxl, adxl_sleep_rate_freq_t freq){
-    uint8_t value;
-    adxl->read(adxl->handle, SPI_READ_SING_BYTE(ADXL34x_REG_POWER_CTL), &value, 1);
-    value = BITMASK_SET(value, 0x03, freq);
-    adxl->write(adxl->handle, SPI_WRITE_SING_BYTE(ADXL34x_REG_POWER_CTL), &value, 1);
+    adxl_BitMask_Edit_Sing_Reg(adxl, ADXL34x_REG_POWER_CTL, 0x03, freq);
 }
     //INT_ENABLE
 void adxl_enableInterrupts(const adxl34x_t *adxl, adxl_int_conf_t config){
-    uint8_t value;
-    adxl->read(adxl->handle, SPI_READ_SING_BYTE(ADXL34x_REG_INT_ENABLE), &value, 1);
-    value = BITMASK_SET(value, 0xFF, config.value);
-    adxl->write(adxl->handle, SPI_WRITE_SING_BYTE(ADXL34x_REG_INT_ENABLE), &value, 1);
+    adxl_BitMask_Edit_Sing_Reg(adxl, ADXL34x_REG_INT_ENABLE, 0xFF, config.value);
 }
     
 void adxl_disableInterrupts(const adxl34x_t *adxl, adxl_int_conf_t config){
-    uint8_t value;
-    adxl->read(adxl->handle, SPI_READ_SING_BYTE(ADXL34x_REG_INT_ENABLE), &value, 1);
-    value = BITMASK_SET(value, config.value, 0x00);
-    adxl->write(adxl->handle, SPI_WRITE_SING_BYTE(ADXL34x_REG_INT_ENABLE), &value, 1);
+    adxl_BitMask_Edit_Sing_Reg(adxl, ADXL34x_REG_INT_ENABLE, config.value, 0x00);
 }
     //INT_MAP
 void adxl_mapInterrupts(const adxl34x_t *adxl, adxl_int_conf_t config){
@@ -104,10 +77,7 @@ adxl_int_src_t adxl_InterruptSrc(const adxl34x_t *adxl){
     return value;
 }
 void adxl_setRange(const adxl34x_t *adxl, adxl_range_t range){
-    uint8_t value;
-    adxl->read(adxl->handle, SPI_READ_SING_BYTE(ADXL34x_REG_DATA_FORMAT), &value, 1);
-    value = BITMASK_SET(value, 0x0B, range);
-    adxl->write(adxl->handle, SPI_WRITE_SING_BYTE(ADXL34x_REG_DATA_FORMAT), &value, 1); 
+    adxl_BitMask_Edit_Sing_Reg(adxl, ADXL34x_REG_DATA_FORMAT, 0x0B, range);
 }
 
 
@@ -132,24 +102,15 @@ adxl_axis_t adxl_get_axis(const adxl34x_t *adxl){
     return axis;
 }
 void adxl_FIFO_Mode(const adxl34x_t *adxl, adxl_FIFO_Mode_t mode){
-    uint8_t value;
-    adxl->read(adxl->handle, SPI_READ_SING_BYTE(ADXL34x_REG_FIFO_CTL), &value, 1);
-    value = BITMASK_SET(value, 0xC0, mode);
-    adxl->write(adxl->handle, SPI_WRITE_SING_BYTE(ADXL34x_REG_FIFO_CTL), &value, 1);
+    adxl_BitMask_Edit_Sing_Reg(adxl, ADXL34x_REG_FIFO_CTL, 0xC0, mode);
 }
 void adxl_FIFO_Samples(const adxl34x_t *adxl, uint8_t n_samples){
     n_samples--;    //The device holds 31 samples in its FIFO + one in the output reg, so 32
     if(n_samples > 31)n_samples = 31;       //It is 32, but the FIFO_CTL, only has 5 bits, so the max is.... 31
-    uint8_t value;
-    adxl->read(adxl->handle, SPI_READ_SING_BYTE(ADXL34x_REG_FIFO_CTL), &value, 1);
-    value = BITMASK_SET(value, 0x1F, n_samples);
-    adxl->write(adxl->handle, SPI_WRITE_SING_BYTE(ADXL34x_REG_FIFO_CTL), &value, 1);
+    adxl_BitMask_Edit_Sing_Reg(adxl, ADXL34x_REG_FIFO_CTL, 0x1F, n_samples);
 }
 void adxl_FIFO_Set_IntPin(const adxl34x_t *adxl, uint8_t pin){
-    uint8_t value;
-    adxl->read(adxl->handle, SPI_READ_SING_BYTE(ADXL34x_REG_FIFO_CTL), &value, 1);
-    value = BITMASK_SET(value, 0x20, pin ? 0x20 : 0x00);
-    adxl->write(adxl->handle, SPI_WRITE_SING_BYTE(ADXL34x_REG_FIFO_CTL), &value, 1);
+    adxl_BitMask_Edit_Sing_Reg(adxl, ADXL34x_REG_FIFO_CTL, 0x20, pin ? 0x20 : 0x00);
 }
 uint8_t adxl_FIFO_Triger_event(const adxl34x_t *adxl){
     uint8_t value;
@@ -163,10 +124,7 @@ uint8_t adxl_FIFO_Entries(const adxl34x_t *adxl){
 }
 
 void adxl_invert_Int(const adxl34x_t *adxl, bool activeLow){
-    uint8_t value;
-    adxl->read(adxl->handle, SPI_READ_SING_BYTE(ADXL34x_REG_DATA_FORMAT), &value, 1);
-    value = BITMASK_SET(value, 0x20, activeLow << 5);
-    adxl->write(adxl->handle, SPI_WRITE_SING_BYTE(ADXL34x_REG_DATA_FORMAT), &value, 1);
+    adxl_BitMask_Edit_Sing_Reg(adxl, ADXL34x_REG_DATA_FORMAT, 0x20, activeLow << 5);
 }
 
 adxl_err_t adxl_calibrate(const adxl34x_t *adxl, uint8_t n_samples){
@@ -210,4 +168,23 @@ adxl_err_t adxl_calibrate(const adxl34x_t *adxl, uint8_t n_samples){
     calibration_val[2] = downgrade10bitTo8bit(z);
     adxl->write(adxl->handle, SPI_WRITE_MULT_BYTES(ADXL34x_REG_OFSX), calibration_val, 3);
     return adxl_OK;   
+}
+adxl_err_t adxl_reset(const adxl34x_t *adxl){
+    // We dont perform a real reset, as there is no reset in the chip..., but we delete the FIFO contents, set a few important registers to its preliminary value
+    uint8_t *zeros = calloc(21, sizeof(uint8_t));
+    adxl->write(adxl->handle, SPI_WRITE_MULT_BYTES(ADXL34x_REG_THRESH_TAP), zeros, 21);
+    adxl->write(adxl->handle, SPI_WRITE_MULT_BYTES(ADXL34x_REG_FIFO_CTL), zeros, 2);
+    //This should write 0s to any bit that is writeable, also disabling the measure bit and any bit that enables the interrupt pin.
+    // Now we can delete the contents of the FIFO.
+    uint8_t n_samples = adxl_FIFO_Entries(adxl);
+    for(int i = 0; i < n_samples; i++){
+        adxl_get_axis(adxl);        //This basically deletes any values in the FIFO
+    }
+    n_samples = adxl_FIFO_Entries(adxl);
+    free(zeros);
+    if(n_samples == 0) return adxl_OK;
+    return adxl_err;
+    
+
+
 }

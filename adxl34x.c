@@ -8,18 +8,12 @@
 #define BITMASK_SET(x, mask, value) (((x) & ~(mask)) | ((value) & (mask)))
 #define BITSHIFT_LEFT(x, n) ((x) = (x) << (n))
 #define STANDARD_1G_10Bit           0x100
-#define THRESHOLD_1G_10Bit          0x012               // For a accepted deviation of 35 mG and Temperature Drift of 0.8mG/°C at 25°C + Error Margin of 10mG
+#define THRESHOLD_1G_10Bit          0x032               // For a accepted deviation of 35 mG and Temperature Drift of 0.8mG/°C at 25°C + Error Margin of 10mG
 
     // Helper Functions
 
-static uint8_t downgrade10bitTo8bit(uint16_t value){
-    float mg_data = (float)value * 3.90625f;
-    mg_data = mg_data / 15.6f;
-    uint8_t ret_value = (int8_t) mg_data;
-    if (ret_value < 0){
-        ret_value = ~abs(ret_value) + 1;
-    }
-    return ret_value;
+static inline int8_t downgrade10bitTo8bit(int16_t value){
+    return value >> 2;
 }
 void adxl_BitMask_Edit_Sing_Reg(const adxl34x_t *adxl, uint8_t reg, uint8_t BitsToZero, uint8_t BitsToSet){
     uint8_t regvalue;
@@ -81,17 +75,17 @@ void adxl_setRange(const adxl34x_t *adxl, adxl_range_t range){
 }
 
 
-uint16_t adxl_getX(const adxl34x_t *adxl){
+int16_t adxl_getX(const adxl34x_t *adxl){
     uint16_t x;
     adxl->read(adxl->handle, SPI_READ_MULT_BYTES(ADXL34x_REG_DATAX0), &x, 2);
     return x;
 }
-uint16_t adxl_getY(const adxl34x_t *adxl){
+int16_t adxl_getY(const adxl34x_t *adxl){
     uint16_t y;
     adxl->read(adxl->handle, SPI_READ_MULT_BYTES(ADXL34x_REG_DATAY0), &y, 2);
     return y;
 }
-uint16_t adxl_getZ(const adxl34x_t *adxl){
+int16_t adxl_getZ(const adxl34x_t *adxl){
     uint16_t z;
     adxl->read(adxl->handle, SPI_READ_MULT_BYTES(ADXL34x_REG_DATAZ0), &z, 2);
     return z;
@@ -130,7 +124,7 @@ void adxl_invert_Int(const adxl34x_t *adxl, bool activeLow){
 adxl_err_t adxl_calibrate(const adxl34x_t *adxl, uint8_t n_samples){
     // To calibrate, we take n samples at the specified recommended sampling rate (100 Hz)
     // And acumulate them, then we just divide the acumulated value 
-    uint32_t x = 0, y = 0, z = 0;
+    int32_t x = 0, y = 0, z = 0;
     if((n_samples % 2) != 0)n_samples++;    //Lets make n_samples base 2, for fcks sake
     if((n_samples > 32))  n_samples = 32;
     adxl_setRange(adxl, _2G);
@@ -141,6 +135,7 @@ adxl_err_t adxl_calibrate(const adxl34x_t *adxl, uint8_t n_samples){
     config.bits.watermark = 1;
     adxl_enableInterrupts(adxl, config);
     adxl_mapInterrupts(adxl, config);            // Mapping watermark interrupt to interrupt src 1 (2)
+    adxl_ena_Measurement(adxl, true);
     uint32_t int_src = adxl->waitInterrupt(adxl->IntSrc_1, false);     //Now it waits here until, or there is timeout or the interrupt happens
     if((int_src & adxl->IntSrc_1) == 0) return adxl_err_timeout;
     for (int i = 0; i < n_samples; i++){
@@ -150,23 +145,24 @@ adxl_err_t adxl_calibrate(const adxl34x_t *adxl, uint8_t n_samples){
         z += calibration_buff.Z_axis;
     }
     uint8_t shift = log2(n_samples);
-    x = x >> shift;
-    y = y >> shift;
-    z = z >> shift;
+    x = x / n_samples; //x = x >> shift;
+    y = y / n_samples; //y = y >> shift;
+    z = z / n_samples; //z = z >> shift;
     // Or a division is actually more secure? I mean... when n_samples not in base 2 is...
     // Now we have to write the correction back in the reg: the reg operate with a scale of 15,6 mg/LSB in 2's complement
     // With 10 Bits, 1G, is 0x100, so now we search the one that is affected by one 1G
-    if(fabs(STANDARD_1G_10Bit - x) < THRESHOLD_1G_10Bit) x -=STANDARD_1G_10Bit;
-    else if(fabs(STANDARD_1G_10Bit - y) < THRESHOLD_1G_10Bit) y -=STANDARD_1G_10Bit;
-    else if(fabs(STANDARD_1G_10Bit - z) < THRESHOLD_1G_10Bit) z -=STANDARD_1G_10Bit;
+    if(fabs(STANDARD_1G_10Bit - fabs(x)) < THRESHOLD_1G_10Bit)      x += (x < 0) ?  + STANDARD_1G_10Bit :  - STANDARD_1G_10Bit;
+    else if(fabs(STANDARD_1G_10Bit - fabs(y)) < THRESHOLD_1G_10Bit) y += (y < 0) ?  + STANDARD_1G_10Bit :  - STANDARD_1G_10Bit;
+    else if(fabs(STANDARD_1G_10Bit - fabs(z)) < THRESHOLD_1G_10Bit) z += (z < 0) ?  + STANDARD_1G_10Bit :  - STANDARD_1G_10Bit;
     else{
         return adxl_err_cal_not_valid;
     }
     uint8_t calibration_val[3];
-    calibration_val[0] = downgrade10bitTo8bit(x);
-    calibration_val[1] = downgrade10bitTo8bit(y);
-    calibration_val[2] = downgrade10bitTo8bit(z);
+    calibration_val[0] = - downgrade10bitTo8bit(x);
+    calibration_val[1] = - downgrade10bitTo8bit(y);
+    calibration_val[2] = - downgrade10bitTo8bit(z);
     adxl->write(adxl->handle, SPI_WRITE_MULT_BYTES(ADXL34x_REG_OFSX), calibration_val, 3);
+    
     return adxl_OK;   
 }
 adxl_err_t adxl_reset(const adxl34x_t *adxl){

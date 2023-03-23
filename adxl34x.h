@@ -105,9 +105,9 @@ typedef enum{
 }adxl_range_t;
 
 typedef struct {
-    uint16_t X_axis;
-    uint16_t Y_axis;
-    uint16_t Z_axis;
+    int16_t X_axis;
+    int16_t Y_axis;
+    int16_t Z_axis;
 } adxl_axis_t;
 
 typedef enum {
@@ -140,9 +140,9 @@ void adxl_disableInterrupts(const adxl34x_t *adxl, adxl_int_conf_t config);
 void adxl_mapInterrupts(const adxl34x_t *adxl, adxl_int_conf_t config);
 adxl_int_src_t adxl_InterruptSrc(const adxl34x_t *adxl);
 void adxl_setRange(const adxl34x_t *adxl, adxl_range_t range);
-uint16_t adxl_getX(const adxl34x_t *adxl);
-uint16_t adxl_getY(const adxl34x_t *adxl);
-uint16_t adxl_getZ(const adxl34x_t *adxl);
+int16_t adxl_getX(const adxl34x_t *adxl);
+int16_t adxl_getY(const adxl34x_t *adxl);
+int16_t adxl_getZ(const adxl34x_t *adxl);
 adxl_axis_t adxl_get_axis(const adxl34x_t *adxl);
 void adxl_FIFO_Mode(const adxl34x_t *adxl, adxl_FIFO_Mode_t mode);
 void adxl_FIFO_Samples(const adxl34x_t *adxl, uint8_t n_samples);

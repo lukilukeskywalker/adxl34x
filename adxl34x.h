@@ -1,5 +1,8 @@
 #ifndef __ADXL34x_H__
 #define __ADXL34x_H__
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 typedef struct{
     int32_t (* read)(void *handle, uint8_t reg, void *in_data, size_t in_size);
@@ -9,6 +12,9 @@ typedef struct{
     int32_t IntSrc_0;
     int32_t IntSrc_1;
 }adxl34x_t;
+// I2C Device Addresses
+#define ADXL34x_I2C_ADDR0		    0x1D	//ALT Address pin to 1
+#define ADXL34x_I2C_ADDR1	    	    0x53	//ALT Address pin to 0
 
 // Register Addresses from the datasheet
 #define ADXL34x_REG_DEVID                   0x00
